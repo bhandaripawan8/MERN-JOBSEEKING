@@ -1,7 +1,7 @@
 
 import { catchAsyncError } from "../middlewares/CatchAsyncError.js";
 import ErrorHandler from "../middlewares/Error.js";
-import { User } from "../model/User";
+import { User } from "../model/User.js";
 
 export const register = catchAsyncError(async(req, res, next) =>{
     const {name, email, phone, role, password} = req.body;
