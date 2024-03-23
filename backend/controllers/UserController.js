@@ -49,15 +49,20 @@ export const login = catchAsyncError(async (req, res, next) => {
         if (user.role !== role) {
             return next(new ErrorHandler('Invalid role', 400));
         }
-
-        // Call sendToken function here if needed
-
-        res.status(200).json({
-            success: true,
-            message: "User logged in successfully",
-            user
-        });
+        sendToken(user, 200, res, "User Logged in successfully!");
     } catch (error) {
         next(error);
     }
 });
+
+export const logout = catchAsyncError(async(req, res, next) =>{
+    res.status(201).cookie("token", "", {
+        httpOnly: true,
+        expires: new Date(Date.now())
+    }).json({
+        success: true,
+        message: "User Logged out successfully"
+    });
+})
+
+
