@@ -1,12 +1,14 @@
 
 import express from 'express';
-import { getAlljobs, postJob } from '../controllers/JobController.js'
+import { getAllJobs, getmyJobs, postJob, updateJob } from '../controllers/JobController.js';
 import { isAuthorised } from '../middlewares/Auth.js';
 
 
 const router = express.Router();
 
-router.get('/getall', getAlljobs);
-router.post('/post', isAuthorised, postJob)
+router.get('/job/getall', getAllJobs);
+router.post('/job/post', isAuthorised, postJob);
+router.post('/job/getmyjobs', isAuthorised, getmyJobs);
+router.post('/job/updatemyjob/:id', isAuthorised, updateJob);
 
 export default router;

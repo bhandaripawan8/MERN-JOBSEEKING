@@ -7,7 +7,7 @@ import {isAuthorised} from '../middlewares/Auth.js'
 const router = express.Router();
 router.post('/register', register);
 router.post('/login', login);
-router.get('/logout', isAuthorised,logout);
+router.get('/logout', isAuthorised, logout);
 
 
 export default router;

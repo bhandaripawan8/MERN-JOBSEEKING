@@ -7,8 +7,7 @@ import userRouter from './routes/UserRouter.js'
 import applicationRouter from './routes/ApplicationsRouter.js'
 import jobRouter from './routes/JobRouter.js'
 import {dbConnection} from './database/dbConnection.js'
-import { errorMiddleware } from './middlewares/Error.js';
-
+import errorMiddleware from './middlewares/error.js';
 
 const app = express();
 dotenv.config();

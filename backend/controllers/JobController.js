@@ -1,35 +1,97 @@
-import {catchAsyncError} from '../middlewares/CatchAsyncError.js'
-import ErrorHandler from '../middlewares/Error.js'
-import {Job} from '../model/Job.js'
+import { catchAsyncError } from "../middlewares/catchAsyncError.js";
+import { Job } from "../model/JobSchema.js";
+import ErrorHandler from "../middlewares/error.js";
 
-export const getAlljobs = catchAsyncError(async(req, res, next) =>{
-    // fetching only jobs which has not expired
-    const jobs = await Job.find({expired: false});
+export const getAllJobs = catchAsyncError(async (req, res, next) => {
+  const jobs = await Job.find({ expired: false });
+  res.status(200).json({
+    success: true,
+    jobs,
+  });
+});
+
+export const postJob = async (req, res, next) => {
+    const { role } = req.user;
+    if (role === "job seeker") {
+      return next(
+        new ErrorHandler("Job Seeker not allowed to access this resource.", 400)
+      );
+    }
+    const {
+      title,
+      description,
+      category,
+      country,
+      city,
+      location,
+      fixedSalary,
+      salaryFrom,
+      salaryTo,
+    } = req.body;
+  
+    if (!title || !description || !category || !country || !city || !location) {
+      return next(new ErrorHandler("Please provide full job details.", 400));
+    }
+  
+    if ((!salaryFrom || !salaryTo) && !fixedSalary) {
+      return next(
+        new ErrorHandler(
+          "Please either provide fixed salary or ranged salary.",
+          400
+        )
+      );
+    }
+  
+    if (salaryFrom && salaryTo && fixedSalary) {
+      return next(
+        new ErrorHandler("Cannot Enter Fixed and Ranged Salary together.", 400)
+      );
+    }
+  
+    const postedBy = req.user._id;
+  
+    try {
+      const job = await Job.create({
+        title,
+        description,
+        category,
+        country,
+        city,
+        location,
+        fixedSalary,
+        salaryFrom,
+        salaryTo,
+        postedBy,
+      });
+  
+      res.status(200).json({
+        success: true,
+        message: "Job Posted Successfully!",
+        job,
+      });
+    } catch (error) {
+      return next(new ErrorHandler("Failed to post job.", 500));
+    }
+  };
+
+  export const getmyJobs = catchAsyncError(async(req, res, next) =>{
+    const {role} = req.user;
+    if(role === "job seeker") {
+        return next(
+            new ErrorHandler("Job seeker is not allowed to access this resources", 400)
+        )
+    }
+    const myJob = await Job.find({postedBy: req.user._id})
     res.status(200).json({
         success: true,
-        jobs,
+        myJob,
     })
-})
+  });
 
-export const postJob = catchAsyncError(async(req, res, next) =>{
+  export const updateJob = catchAsyncError(async(req, res, next) =>{
     const {role} = req.user;
-    if(role === 'Job Seeker'){
-        return next(new ErrorHandler("Job Seeker is not allowed to access this resources!", 411))
+    if(role === "job seeker"){
+        return next(new ErrorHandler(""))
     }
-    const {title, description, category, country, city, location, fixedSalary, salaryFrom, salaryTo} = req.body;
-    if(!title || !description || !category || !country || !city || !location){
-        return next (new ErrorHandler('Please provide all the details', 400))
-    }
-    if((!fixedSalary || !salaryFrom) && !salaryTo){
-        return next(new ErrorHandler("Please either provide fixed salary or ranged salary"))
-    }
-    if(salaryFrom && salaryTo && fixedSalary){
-        return next(new ErrorHandler("Cannot enter fixed salary and ranged salary together"))
-    }
-    const postedBy = req.user._id;
-    const job = await Job.create({
-        title, description, category, country, city, location, fixedSalary, salaryFrom, salaryTo, postedBy
-    })
-    res.status(200).json({success: true, message: "Job posted successfully"}, job)
-})
-
+  })
+  
